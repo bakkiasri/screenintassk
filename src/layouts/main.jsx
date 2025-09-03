@@ -1,5 +1,6 @@
 import Sidebar from "./sidemenu";
 import Naavbars from "./navbar";
+
 function Layout({ children }) {
   return (
     <div className="flex min-h-screen bg-cover bg-center bg-no-repeat">
@@ -7,11 +8,14 @@ function Layout({ children }) {
       <Sidebar className="flex" />
 
       {/* Main content area */}
-      <div className="flex-1 flex flex-col overflow-auto ml-0 lg:ml-58">
-        <div className="p-0 flex-1 overflow-y-auto">
+      <div className="flex-1 flex flex-col overflow-hidden ml-0 lg:ml-64 bg-[#f9fafb]">
+        {/* Fixed Navbar */}
+        <div className="fixed top-0 left-0 lg:left-64 right-0 z-50 bg-white shadow">
           <Naavbars />
-          {children}
         </div>
+
+        {/* Scrollable content */}
+        <div className="flex-1 overflow-y-auto mt-16 p-10">{children}</div>
       </div>
     </div>
   );
