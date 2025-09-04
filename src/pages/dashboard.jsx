@@ -1,46 +1,47 @@
 import Layout from "../layouts/main";
-import { IoCubeOutline } from "react-icons/io5";
-import { IoIosTrendingUp } from "react-icons/io";
-import { HiOutlineUserGroup } from "react-icons/hi2";
-import { IoIosTrendingDown } from "react-icons/io";
+
 import PieChart from "../components/piechart";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import BarChart from "../components/barchart";
 import { Link } from "react-router-dom";
+import Totals from "../components/totals";
 const Dashboard = () => {
   const [selected, setSelected] = useState("");
-  const display_count = [
-    {
-      name: "Total assets",
-      count: "14",
-      icon: IoCubeOutline,
-      bgcolor: "bg-[#0284c7]",
-    },
-    {
-      name: "Available",
-      count: "11,435",
-      icon: IoIosTrendingUp,
-      bgcolor: "bg-[#16a34a]",
-    },
-    {
-      name: "Assigned",
-      count: "0",
-      icon: HiOutlineUserGroup,
-      bgcolor: "bg-[#eab308]",
-    },
-    {
-      name: "Expended",
-      count: "1000",
-      icon: IoIosTrendingDown,
-      bgcolor: "bg-[#dc2626]",
-    },
-  ];
+  const [dashboardData, setDashboardData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  console.log(dashboardData);
+  useEffect(() => {
+    const token = localStorage.getItem("authToken");
 
+    if (!token) {
+      toast.error("No token found. Please login first."); // ✅ toast
+      setLoading(false);
+      return;
+    }
+
+    fetch("https://servermms.onrender.com/api/dashboard", {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`, // ✅ send token
+      },
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error("Failed to fetch dashboard data");
+        return res.json();
+      })
+      .then((data) => {
+        setDashboardData(data);
+        setLoading(false);
+      })
+      .catch((err) => {
+        toast.error(err.message); // ✅ show error in toast
+        setLoading(false);
+      });
+  }, []);
   return (
-    // dashboard
     <Layout>
       <div className="h-screen flex-row bg-gray-50 p-3 space-y-3 justify-center items-center">
-        {/* Top grid */}
         <div className="grid grid-cols-1 sm:grid-cols-3 bg-white rounded-lg p-3 gap-3 shadow">
           <div className="flex-row ">
             <div>Base</div>
@@ -85,27 +86,8 @@ const Dashboard = () => {
           </div>
         </div>
 
-        {/* Display counts */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
-          {display_count.map((item) => {
-            const Icon = item.icon;
-            return (
-              <div
-                key={item.name}
-                className="flex bg-white p-2 shadow-md rounded-md"
-              >
-                <div className="p-2">
-                  <Icon
-                    className={`${item.bgcolor} p-3 h-12 w-12 rounded-md text-white`}
-                  />
-                </div>
-                <div className="flex flex-col p-2">
-                  <div className="text-[#6B7280]">{item.name}</div>
-                  <div className="text-md">{item.count}</div>
-                </div>
-              </div>
-            );
-          })}
+          <Totals data={dashboardData} />
         </div>
 
         <div className="flex grid grid-cols-1 lg:grid-cols-2 gap-3 ">

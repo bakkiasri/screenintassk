@@ -13,7 +13,8 @@ import Assignment from "./pages/Assignment";
 import Expenditure from "./pages/Expenditure";
 import Users from "./pages/Users";
 import Settings from "./pages/Settings";
-
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 function App() {
   return (
     <div className="App ">
@@ -28,6 +29,7 @@ function App() {
         <Route path="/settings" element={<Settings />} />
         <Route path="/expenditure" element={<Expenditure />} />
       </Routes>
+      <ToastContainer position="top-right" autoClose={3000} />
     </div>
   );
 }
