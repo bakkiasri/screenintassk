@@ -25,8 +25,8 @@ export default function Sidebar() {
   return (
     <div className="hidden lg:block fixed top-0 left-0 h-screen w-64 bg-[#0d1321]">
       {/* Logo */}
-      <div className="flex items-center gap-2 text-white px-4 py-5 text-lg">
-        {/* <img src={Logo} alt="logo" /> */}image
+      <div className="flex items-center gap-2 text-white px-4 py-1 text-xl font-bold">
+        {/* <img src={Logo} alt="logo" /> */}Military Asset Management
       </div>
       {/* Menu */}
       <div className="flex flex-col  text-white mt-5">
@@ -35,19 +35,19 @@ export default function Sidebar() {
           return (
             <Link
               key={item.name}
-              onClick={() => setActive(item.name)}
               to={item.link}
-              className={`flex items-center gap-3 ps-2 pe-2 py-2 cursor-pointer transition-all relative
+              className={`flex items-center gap-3 ps-4 pe-2 py-2 text-[#d1d5db] cursor-pointer transition-all relative
                 ${
                   active === item.name
                     ? "bg-[#2E2E48] rounded-sm text-white font-semibold"
-                    : "hover:bg-[#2E2E48] hover:rounded-sm hover:text-white hover:font-semibold"
+                    : "hover:bg-[#2E2E48] hover:rounded-sm  hover:text-white hover:font-semibold"
                 }`}
+              onClick={() => setActive(item.name)}
             >
-              <span className="text-lg text-[#9ca3af]">
+              <span className="text-lg  ">
                 <Icon />
               </span>
-              <span className="text-[#d1d5db] ">{item.name}</span>
+              <span className=" ">{item.name}</span>
             </Link>
           );
         })}

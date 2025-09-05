@@ -5,11 +5,41 @@ import { useState, useEffect } from "react";
 import BarChart from "../components/barchart";
 import { Link } from "react-router-dom";
 import Totals from "../components/totals";
+import Tables from "../components/table";
+import TablesA from "../components/tableA";
 const Dashboard = () => {
   const [selected, setSelected] = useState("");
   const [dashboardData, setDashboardData] = useState(null);
   const [loading, setLoading] = useState(true);
-  console.log(dashboardData);
+  const recentTransfers = dashboardData?.recentTransfers || [];
+  const recentPurchases = dashboardData?.recentPurchases || [];
+  const recentAssignments = dashboardData?.recentAssignments || [];
+  const recentExpenditures = dashboardData?.recentExpenditures || [];
+
+  const recentTransferHeader = [
+    "Asset",
+    "From",
+    "To",
+    "Quantity",
+    "Status",
+    "Date",
+  ];
+  const recentPurchaseHeader = ["Asset", "Base", "Quantity", "Status", "Date"];
+  const recentExpenditureHeader = [
+    "Asset",
+    "Base",
+    "Quantity",
+    "Status",
+    "Date",
+  ];
+
+  const recentAssignmentsHeader = [
+    "Asset",
+    "ASSIGNED TO",
+    "Quantity",
+    "Status",
+    "Date",
+  ];
   useEffect(() => {
     const token = localStorage.getItem("authToken");
 
@@ -39,6 +69,10 @@ const Dashboard = () => {
         setLoading(false);
       });
   }, []);
+  if (!dashboardData) {
+    return <div>Loading...</div>;
+  }
+
   return (
     <Layout>
       <div className="h-screen flex-row bg-gray-50 p-3 space-y-3 justify-center items-center">
@@ -87,7 +121,7 @@ const Dashboard = () => {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
-          <Totals data={dashboardData} />
+          <Totals data={recentTransfers} />
         </div>
 
         <div className="flex grid grid-cols-1 lg:grid-cols-2 gap-3 ">
@@ -99,296 +133,24 @@ const Dashboard = () => {
           </div>
         </div>
         <div className="flex grid grid-cols-1  lg:grid-cols-2 gap-3">
-          <div className="flex-row bg-white p-6 shadow-xl rounded-lg space-y-4">
-            <div className="flex justify-between ">
-              <div>
-                <h2 className="text-lg text-center font-semibold mb-2">
-                  Assets Overview
-                </h2>
-              </div>
-              <div>
-                <Link className="text-[#0284c7]">View all</Link>
-              </div>
-            </div>
-            <div className="overflow-x-auto">
-              <table className="min-w-[1000px]  ">
-                <thead className="border-b-1 border-gray-200">
-                  <tr className="p-2 text-[#6b7280]">
-                    <th className="px-4 py-2 text-left text-sm font-semibold text-gray-600">
-                      ASSET
-                    </th>
-                    <th className="px-4 py-2 text-left text-sm font-semibold text-gray-600">
-                      FROM
-                    </th>
-                    <th className="px-4 py-2 text-left text-sm font-semibold text-gray-600">
-                      TO
-                    </th>
-                    <th className="px-4 py-2 text-left text-sm font-semibold text-gray-600">
-                      QUALITY
-                    </th>
-                    <th className="px-4 py-2 text-left text-sm font-semibold text-gray-600">
-                      STATUS
-                    </th>
-                    <th className="px-4 py-2 text-left text-sm font-semibold text-gray-600">
-                      DATE
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-200 text-[#6b7280]">
-                  <tr>
-                    <td className="px-4 py-2">vhvh</td>
-                    <td className="px-4 py-2">Base Charlie</td>
-                    <td className="px-4 py-2">Base Alpha</td>
-                    <td className="px-4 py-2">1</td>
-                    <td className="px-4 py-2">Completed</td>
-                    <td className="px-4 py-2">Aug 17, 2025</td>
-                  </tr>
-                  <tr>
-                    <td className="px-4 py-2">vhvh</td>
-                    <td className="px-4 py-2">Base Charlie</td>
-                    <td className="px-4 py-2">Base Alpha</td>
-                    <td className="px-4 py-2">1</td>
-                    <td className="px-4 py-2">Completed</td>
-                    <td className="px-4 py-2">Aug 17, 2025</td>
-                  </tr>
-                  <tr>
-                    <td className="px-4 py-2">vhvh</td>
-                    <td className="px-4 py-2">Base Charlie</td>
-                    <td className="px-4 py-2">Base Alpha</td>
-                    <td className="px-4 py-2">1</td>
-                    <td className="px-4 py-2">Completed</td>
-                    <td className="px-4 py-2">Aug 17, 2025</td>
-                  </tr>
-                  <tr>
-                    <td className="px-4 py-2">vhvh</td>
-                    <td className="px-4 py-2">Base Charlie</td>
-                    <td className="px-4 py-2">Base Alpha</td>
-                    <td className="px-4 py-2">1</td>
-                    <td className="px-4 py-2">Completed</td>
-                    <td className="px-4 py-2">Aug 17, 2025</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-          <div className="flex-row bg-white p-6 shadow-xl rounded-lg space-y-4">
-            <div className="flex justify-between ">
-              <div>
-                <h2 className="text-lg text-center font-semibold mb-2">
-                  Assets Overview
-                </h2>
-              </div>
-              <div>
-                <Link className="text-[#0284c7]">View all</Link>
-              </div>
-            </div>
-            <div className="overflow-x-auto">
-              <table className="min-w-[1000px]  ">
-                <thead className="border-b-1 border-gray-200">
-                  <tr className="p-2 text-[#6b7280]">
-                    <th className="px-4 py-2 text-left text-sm font-semibold text-gray-600">
-                      ASSET
-                    </th>
-                    <th className="px-4 py-2 text-left text-sm font-semibold text-gray-600">
-                      FROM
-                    </th>
-                    <th className="px-4 py-2 text-left text-sm font-semibold text-gray-600">
-                      TO
-                    </th>
-                    <th className="px-4 py-2 text-left text-sm font-semibold text-gray-600">
-                      QUALITY
-                    </th>
-                    <th className="px-4 py-2 text-left text-sm font-semibold text-gray-600">
-                      STATUS
-                    </th>
-                    <th className="px-4 py-2 text-left text-sm font-semibold text-gray-600">
-                      DATE
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-200 text-[#6b7280]">
-                  <tr>
-                    <td className="px-4 py-2">vhvh</td>
-                    <td className="px-4 py-2">Base Charlie</td>
-                    <td className="px-4 py-2">Base Alpha</td>
-                    <td className="px-4 py-2">1</td>
-                    <td className="px-4 py-2">Completed</td>
-                    <td className="px-4 py-2">Aug 17, 2025</td>
-                  </tr>
-                  <tr>
-                    <td className="px-4 py-2">vhvh</td>
-                    <td className="px-4 py-2">Base Charlie</td>
-                    <td className="px-4 py-2">Base Alpha</td>
-                    <td className="px-4 py-2">1</td>
-                    <td className="px-4 py-2">Completed</td>
-                    <td className="px-4 py-2">Aug 17, 2025</td>
-                  </tr>
-                  <tr>
-                    <td className="px-4 py-2">vhvh</td>
-                    <td className="px-4 py-2">Base Charlie</td>
-                    <td className="px-4 py-2">Base Alpha</td>
-                    <td className="px-4 py-2">1</td>
-                    <td className="px-4 py-2">Completed</td>
-                    <td className="px-4 py-2">Aug 17, 2025</td>
-                  </tr>
-                  <tr>
-                    <td className="px-4 py-2">vhvh</td>
-                    <td className="px-4 py-2">Base Charlie</td>
-                    <td className="px-4 py-2">Base Alpha</td>
-                    <td className="px-4 py-2">1</td>
-                    <td className="px-4 py-2">Completed</td>
-                    <td className="px-4 py-2">Aug 17, 2025</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
+          <Tables
+            data={recentTransfers}
+            tablehead={recentTransferHeader}
+            title="Recent Transfers"
+          />
+          <Tables
+            data={recentPurchases}
+            tablehead={recentPurchaseHeader}
+            title="Recent Purchase"
+          />
         </div>
         <div className="flex grid grid-cols-1  lg:grid-cols-2 gap-3">
-          <div className="flex-row bg-white p-6 shadow-xl rounded-lg space-y-4">
-            <div className="flex justify-between ">
-              <div>
-                <h2 className="text-lg text-center font-semibold mb-2">
-                  Recent Assignments
-                </h2>
-              </div>
-              <div>
-                <Link className="text-[#0284c7]">View all</Link>
-              </div>
-            </div>
-            <div className="overflow-x-auto">
-              <table className="min-w-[1000px]  ">
-                <thead className="border-b-1 border-gray-200">
-                  <tr className="p-2 text-[#6b7280]">
-                    <th className="px-4 py-2 text-left text-sm font-semibold text-gray-600">
-                      ASSET
-                    </th>
-                    <th className="px-4 py-2 text-left text-sm font-semibold text-gray-600">
-                      FROM
-                    </th>
-                    <th className="px-4 py-2 text-left text-sm font-semibold text-gray-600">
-                      TO
-                    </th>
-                    <th className="px-4 py-2 text-left text-sm font-semibold text-gray-600">
-                      QUALITY
-                    </th>
-                    <th className="px-4 py-2 text-left text-sm font-semibold text-gray-600">
-                      STATUS
-                    </th>
-                    <th className="px-4 py-2 text-left text-sm font-semibold text-gray-600">
-                      DATE
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-200 text-[#6b7280]">
-                  <tr>
-                    <td className="px-4 py-2">vhvh</td>
-                    <td className="px-4 py-2">Base Charlie</td>
-                    <td className="px-4 py-2">Base Alpha</td>
-                    <td className="px-4 py-2">1</td>
-                    <td className="px-4 py-2">Completed</td>
-                    <td className="px-4 py-2">Aug 17, 2025</td>
-                  </tr>
-                  <tr>
-                    <td className="px-4 py-2">vhvh</td>
-                    <td className="px-4 py-2">Base Charlie</td>
-                    <td className="px-4 py-2">Base Alpha</td>
-                    <td className="px-4 py-2">1</td>
-                    <td className="px-4 py-2">Completed</td>
-                    <td className="px-4 py-2">Aug 17, 2025</td>
-                  </tr>
-                  <tr>
-                    <td className="px-4 py-2">vhvh</td>
-                    <td className="px-4 py-2">Base Charlie</td>
-                    <td className="px-4 py-2">Base Alpha</td>
-                    <td className="px-4 py-2">1</td>
-                    <td className="px-4 py-2">Completed</td>
-                    <td className="px-4 py-2">Aug 17, 2025</td>
-                  </tr>
-                  <tr>
-                    <td className="px-4 py-2">vhvh</td>
-                    <td className="px-4 py-2">Base Charlie</td>
-                    <td className="px-4 py-2">Base Alpha</td>
-                    <td className="px-4 py-2">1</td>
-                    <td className="px-4 py-2">Completed</td>
-                    <td className="px-4 py-2">Aug 17, 2025</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-          <div className="flex-row bg-white p-6 shadow-xl rounded-lg space-y-4">
-            <div className="flex justify-between ">
-              <div>
-                <h2 className="text-lg text-center font-semibold mb-2">
-                  Recent Expenditures
-                </h2>
-              </div>
-              <div>
-                <Link className="text-[#0284c7]">View all</Link>
-              </div>
-            </div>
-            <div className="overflow-x-auto">
-              <table className="min-w-[1000px]  ">
-                <thead className="border-b-1 border-gray-200">
-                  <tr className="p-2 text-[#6b7280]">
-                    <th className="px-4 py-2 text-left text-sm font-semibold text-gray-600">
-                      ASSET
-                    </th>
-                    <th className="px-4 py-2 text-left text-sm font-semibold text-gray-600">
-                      FROM
-                    </th>
-                    <th className="px-4 py-2 text-left text-sm font-semibold text-gray-600">
-                      TO
-                    </th>
-                    <th className="px-4 py-2 text-left text-sm font-semibold text-gray-600">
-                      QUALITY
-                    </th>
-                    <th className="px-4 py-2 text-left text-sm font-semibold text-gray-600">
-                      STATUS
-                    </th>
-                    <th className="px-4 py-2 text-left text-sm font-semibold text-gray-600">
-                      DATE
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-200 text-[#6b7280]">
-                  <tr>
-                    <td className="px-4 py-2">vhvh</td>
-                    <td className="px-4 py-2">Base Charlie</td>
-                    <td className="px-4 py-2">Base Alpha</td>
-                    <td className="px-4 py-2">1</td>
-                    <td className="px-4 py-2">Completed</td>
-                    <td className="px-4 py-2">Aug 17, 2025</td>
-                  </tr>
-                  <tr>
-                    <td className="px-4 py-2">vhvh</td>
-                    <td className="px-4 py-2">Base Charlie</td>
-                    <td className="px-4 py-2">Base Alpha</td>
-                    <td className="px-4 py-2">1</td>
-                    <td className="px-4 py-2">Completed</td>
-                    <td className="px-4 py-2">Aug 17, 2025</td>
-                  </tr>
-                  <tr>
-                    <td className="px-4 py-2">vhvh</td>
-                    <td className="px-4 py-2">Base Charlie</td>
-                    <td className="px-4 py-2">Base Alpha</td>
-                    <td className="px-4 py-2">1</td>
-                    <td className="px-4 py-2">Completed</td>
-                    <td className="px-4 py-2">Aug 17, 2025</td>
-                  </tr>
-                  <tr>
-                    <td className="px-4 py-2">vhvh</td>
-                    <td className="px-4 py-2">Base Charlie</td>
-                    <td className="px-4 py-2">Base Alpha</td>
-                    <td className="px-4 py-2">1</td>
-                    <td className="px-4 py-2">Completed</td>
-                    <td className="px-4 py-2">Aug 17, 2025</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
+          <TablesA data={recentAssignments} />
+          <Tables
+            data={recentExpenditures}
+            tablehead={recentExpenditureHeader}
+            title="Recent Expenditures"
+          />
         </div>
       </div>
     </Layout>
