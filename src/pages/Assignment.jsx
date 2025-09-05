@@ -3,8 +3,7 @@ import Layout from "../layouts/main";
 import { FiFilter } from "react-icons/fi";
 import { GoPlus } from "react-icons/go";
 import { toast } from "react-toastify";
-import { FaChevronRight } from "react-icons/fa6";
-import { FaChevronLeft } from "react-icons/fa6";
+import { FaChevronRight, FaChevronLeft } from "react-icons/fa6";
 
 const Assignment = () => {
   const [loading, setLoading] = useState(false);
@@ -39,15 +38,18 @@ const Assignment = () => {
           }
         );
 
-        if (!res.ok) throw new Error("Failed to fetch assets data");
+        if (!res.ok) throw new toast.error("Failed to fetch assets data");
 
         const data = await res.json();
-        setAssets(data.assets || []);
-        setTotal(data.total || 0); // backend should return total count
+
+        setAssets(data.assignments || []);
+
+        setTotal(data.total || 0);
       } catch (err) {
         toast.error(err.message);
       } finally {
         setLoading(false);
+        console.log("fetched  data", assets);
       }
     };
 
@@ -56,18 +58,16 @@ const Assignment = () => {
 
   return (
     <Layout>
-      <div className="flex-row justify-center items-center">
+      <div className="flex-row justify-center mt-5 py-4 items-center">
         <div className="flex justify-between">
           <div className="text-lg">Assignment</div>
           <div className="flex gap-3">
-            {/* Filter Button */}
             <div>
               <button className="flex gap-2 text-lg border-1 rounded-md p-2 bg-white text-[#374151] border-[#d1d5db]">
                 <FiFilter className="pt-1 h-6 text-[#374151]" />
                 <span>Filters</span>
               </button>
             </div>
-            {/* Add Asset Button */}
             <div className="flex">
               <button className="flex gap-2 text-lg border-1 rounded-md p-2 bg-[#0284c7] text-white border-[#d1d5db]">
                 <GoPlus className="pt-1 h-7" />
@@ -77,7 +77,6 @@ const Assignment = () => {
           </div>
         </div>
 
-        {/* Table */}
         <div className="mt-4 bg-white border border-gray-200 shadow-md rounded-xl">
           {loading ? (
             <p className="text-center">Loading...</p>
@@ -87,7 +86,7 @@ const Assignment = () => {
                 <thead className="text-[#6b7280]">
                   <tr>
                     <th className="px-4 py-4 text-left text-sm font-medium">
-                      NAME
+                      ASSET
                     </th>
                     <th className="px-4 py-4 text-left text-sm font-medium">
                       TYPE
@@ -96,75 +95,60 @@ const Assignment = () => {
                       BASE
                     </th>
                     <th className="px-4 py-4 text-left text-sm font-medium">
-                      AVAILABLE
+                      ASSIGNED TO
                     </th>
                     <th className="px-4 py-4 text-left text-sm font-medium">
-                      ASSIGNED
+                      QUANTITY
                     </th>
                     <th className="px-4 py-4 text-left text-sm font-medium">
                       STATUS
                     </th>
                     <th className="px-4 py-4 text-left text-sm font-medium">
-                      ACTIONS
+                      DATE
                     </th>
                   </tr>
                 </thead>
                 <tbody>
-                  {assets.length > 0 ? (
+                  {
                     assets.map((asset, index) => (
                       <tr
                         key={asset._id || index}
                         className="border-t border-[#e5e7eb] hover:bg-gray-50"
                       >
                         <td className="px-4 py-4 text-[#0284c7] font-medium cursor-pointer">
-                          {asset.name}
+                          {asset.assetName}
                         </td>
                         <td className="px-4 py-4 text-sm text-[#6b7280]">
-                          {asset.type}
+                          {asset.assetType}
                         </td>
                         <td className="px-4 py-4 text-sm text-[#6b7280]">
                           {asset.base}
                         </td>
                         <td className="px-4 py-4 text-sm text-[#6b7280]">
-                          {asset.available}
+                          {asset.assignedTo?.name || "-"}
                         </td>
                         <td className="px-4 py-4 text-sm text-[#6b7280]">
-                          {asset.assigned}
+                          {asset.quantity}
                         </td>
-                        <td className="px-4 py-4">
-                          {asset.available > asset.assigned ? (
-                            <span className="px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                              Sufficient
-                            </span>
-                          ) : (
-                            <span className="px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                              Insufficient
-                            </span>
-                          )}
+                        <td className="px-4 py-4 text-sm text-[#6b7280]">
+                          {asset.status}
                         </td>
-                        <td className="flex px-4 py-4 gap-6 text-sm">
-                          <button className="text-[#0284c7] hover:underline">
-                            View
-                          </button>
-                          <button className="text-[#2563eb] hover:underline">
-                            Edit
-                          </button>
-                          <button className="text-[#DC2626] hover:underline">
-                            Delete
-                          </button>
+                        <td className="px-4 py-4 text-sm text-[#6b7280]">
+                          {new Date(asset.startDate).toLocaleDateString()}
                         </td>
                       </tr>
                     ))
-                  ) : (
-                    <tr>
-                      <td
-                        colSpan="7"
-                        className="text-center py-4 text-gray-500"
-                      >
-                        No assets found
-                      </td>
-                    </tr>
-                  )}
+                    // ) : (
+                    //   <tr>
+                    //     <td
+                    //       colSpan="7"
+                    //       className="text-center py-4 text-gray-500"
+                    //     >
+                    //       No assignments found
+                    //     </td>
+                    //   </tr>
+                    // )}
+                  }
                 </tbody>
               </table>
             </div>
@@ -172,24 +156,27 @@ const Assignment = () => {
 
           {/* Pagination */}
           <div className="flex justify-between px-4">
-            <div className="flex mt-4">Showing 11 to 14 of 14 results</div>
+            <div className="flex mt-4">
+              Showing {(page - 1) * limit + 1} to{" "}
+              {Math.min(page * limit, total)} of {total} results
+            </div>
             <div className="flex gap-3">
               <div className="flex mt-4">
                 <select
                   id="options"
                   value={limit}
-                  onChange={(e) => setLimit(e.target.value)}
-                  className="block w-full  border hover:border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-none  focus:border-none"
+                  onChange={(e) => setLimit(Number(e.target.value))}
+                  className="block w-full border hover:border-gray-300 rounded-md shadow-sm focus:outline-none"
                 >
                   <option value="10">10 per page</option>
-                  <option value="25">20 per page</option>
+                  <option value="25">25 per page</option>
                   <option value="50">50 per page</option>
                   <option value="100">100 per page</option>
                 </select>
               </div>
               <div className="flex justify-end mt-4 ">
                 <button
-                  className="px-3 py-1 rounded-l-md border  disabled:opacity-50"
+                  className="px-3 py-1 rounded-l-md border disabled:opacity-50"
                   onClick={() => setPage((p) => p - 1)}
                   disabled={page === 1}
                 >
@@ -199,10 +186,10 @@ const Assignment = () => {
                 {[...Array(totalPages)].map((_, i) => (
                   <button
                     key={i}
-                    className={`px-3 py-1 border  ${
+                    className={`px-3 py-1 border ${
                       page === i + 1
-                        ? "bg-[#f0f9ff] text-[#0284c7] border-1 border-[#0284c7]"
-                        : "border-1 border-[#d1d5db] text-[#6b7280]"
+                        ? "bg-[#f0f9ff] text-[#0284c7] border-[#0284c7]"
+                        : "border-[#d1d5db] text-[#6b7280]"
                     }`}
                     onClick={() => setPage(i + 1)}
                   >
@@ -211,7 +198,7 @@ const Assignment = () => {
                 ))}
 
                 <button
-                  className="px-3 py-1 border rounded-r-md  disabled:opacity-50"
+                  className="px-3 py-1 border rounded-r-md disabled:opacity-50"
                   onClick={() => setPage((p) => p + 1)}
                   disabled={page === totalPages}
                 >
