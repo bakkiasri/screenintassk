@@ -8,6 +8,8 @@ import {
   Legend,
 } from "chart.js";
 import { Bar } from "react-chartjs-2";
+
+// ✅ Register Chart.js components
 ChartJS.register(
   CategoryScale,
   LinearScale,
@@ -17,34 +19,51 @@ ChartJS.register(
   Legend
 );
 
-function BarChart({ data }) {
-  const assetsByType = data?.assetsByType || {};
+const BarChart = () => {
+  // const data = {
+  //   labels: ["Weapon", "Vehicle", "Ammunition"],
+  //   datasets: [
+  //     {
+  //       label: "Assets",
+  //       data: [1200, 1000, 9000],
+  //       backgroundColor: "#0284C7",
+  //     },
+  //   ],
+  // };
+  // const options = {
+  //   responsive: true,
+  //   maintainAspectRatio: true, // keeps aspect ratio
+  //   aspectRatio: 10,
+  //   resizeDelay: 200, //  delay for resize (ms)
+  //   plugins: {
+  //     legend: {
+  //       position: "top",
+  //     },
+  //     title: {
+  //       display: true,
+  //       text: "Responsive Bar Chart",
+  //     },
+  //   },
+  //   scales: {
+  //     y: {
+  //       beginAtZero: true,
+  //       min: 0,
+  //       max: 9000,
+  //       ticks: {
+  //         stepSize: 1000,
+  //         autoSkip: false,
+  //         padding: 20,
+  //         callback: function (value) {
+  //           return value; // show 1000, 2000, … 9000
+  //         },
+  //       },
+  //     },
+  //   },
+  // };
 
-  const labels = assetsByType.map((item) => item.type);
-  // values → e.g., available count
-  const values = assetsByType.map((item) => item.count);
-  console.log(assetsByType);
-  const data1 = {
-    labels: labels,
-    datasets: [
-      {
-        label: "Available",
-        backgroundColor: "#10B981",
-        data: values, // available counts
-      },
-      {
-        label: "Assigned",
-        backgroundColor: "#F59E0B",
-        data: values, // assigned counts
-      },
-    ],
-  };
-
-  // Chart Options
   const options = {
     responsive: true,
     maintainAspectRatio: true,
-    resizeDelay: 200,
     plugins: {
       legend: {
         position: "top",
@@ -66,12 +85,41 @@ function BarChart({ data }) {
       },
     },
   };
+  const data = {
+    labels: ["Weapon", "Vehicle", "Ammunition"],
+    datasets: [
+      {
+        label: "Available",
+        data: [1200, 1000, 9000],
+        backgroundColor: "#10B981",
+      },
+      {
+        label: "Assigned",
+        data: [500, 400, 2000],
+        backgroundColor: "#F59E0B",
+      },
+    ],
+  };
 
+  // const options = {
+  //   responsive: true,
+  //   maintainAspectRatio: false,
+  //   plugins: {
+  //     legend: {
+  //       position: "top",
+  //     },
+  //     title: {
+  //       display: false,
+  //     },
+  //   },
+  // };
   return (
-    <div className="flex justify-center pe-6 w-[350px] sm:w-full md:w-full h-[300px]">
-      <Bar data={data1} options={options} />
-    </div>
+    <>
+      <div className="flex justify-center pe-6 w-[350px] sm:w-full md:w-full h-[300px] ">
+        <Bar data={data} options={options} />
+      </div>
+    </>
   );
-}
+};
 
 export default BarChart;
