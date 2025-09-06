@@ -50,12 +50,23 @@ const Assignment = () => {
       } finally {
         setLoading(false);
         console.log("fetched  data", assets);
+        toast.success("successfully loaded the data");
       }
     };
 
     fetchAssets();
   }, [page, limit]);
-
+  if (assets.length <= 0) {
+    toast.error("no data found");
+  }
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center h-screen bg-gray-50">
+        <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+        <p className="mt-4 text-lg font-semibold text-gray-700">Loading...</p>
+      </div>
+    );
+  }
   return (
     <Layout>
       <div className="flex-row justify-center mt-5 py-4 items-center">
@@ -88,14 +99,15 @@ const Assignment = () => {
                     <th className="px-4 py-4 text-left text-sm font-medium">
                       ASSET
                     </th>
-                    <th className="px-4 py-4 text-left text-sm font-medium">
-                      TYPE
-                    </th>
+
                     <th className="px-4 py-4 text-left text-sm font-medium">
                       BASE
                     </th>
                     <th className="px-4 py-4 text-left text-sm font-medium">
                       ASSIGNED TO
+                    </th>
+                    <th className="px-4 py-4 text-left text-sm font-medium">
+                      PURPOSE
                     </th>
                     <th className="px-4 py-4 text-left text-sm font-medium">
                       QUANTITY
@@ -105,6 +117,9 @@ const Assignment = () => {
                     </th>
                     <th className="px-4 py-4 text-left text-sm font-medium">
                       DATE
+                    </th>
+                    <th className="px-4 py-4 text-left text-sm font-medium">
+                      ACTION
                     </th>
                   </tr>
                 </thead>
@@ -116,25 +131,37 @@ const Assignment = () => {
                         className="border-t border-[#e5e7eb] hover:bg-gray-50"
                       >
                         <td className="px-4 py-4 text-[#0284c7] font-medium cursor-pointer">
-                          {asset.assetName}
+                          <div>{asset.assetName}</div>
+                          <div className="text-sm font-normal text-[#6b7280]">
+                            {asset.assetType}
+                          </div>
                         </td>
-                        <td className="px-4 py-4 text-sm text-[#6b7280]">
-                          {asset.assetType}
-                        </td>
+
                         <td className="px-4 py-4 text-sm text-[#6b7280]">
                           {asset.base}
                         </td>
                         <td className="px-4 py-4 text-sm text-[#6b7280]">
-                          {asset.assignedTo?.name || "-"}
+                          <div>{asset.assignedTo?.name || "-"}</div>
+                          <div>
+                            <span>{asset.assignedTo?.rank || "-"}</span>
+                            <span>({asset.assignedTo?.id || "-"})</span>
+                          </div>
                         </td>
                         <td className="px-4 py-4 text-sm text-[#6b7280]">
                           {asset.quantity}
                         </td>
                         <td className="px-4 py-4 text-sm text-[#6b7280]">
+                          {asset.purpose}
+                        </td>
+
+                        <td className="px-4 py-4 text-sm text-[#6b7280]">
                           {asset.status}
                         </td>
                         <td className="px-4 py-4 text-sm text-[#6b7280]">
                           {new Date(asset.startDate).toLocaleDateString()}
+                        </td>
+                        <td className="px-4 py-4 text-sm text-[#0284c7]">
+                          View
                         </td>
                       </tr>
                     ))

@@ -53,10 +53,17 @@ const Assets = () => {
 
     fetchAssets();
   }, [page, limit]);
-
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center h-screen bg-gray-50">
+        <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+        <p className="mt-4 text-lg font-semibold text-gray-700">Loading...</p>
+      </div>
+    );
+  }
   return (
     <Layout>
-      <div className="flex-row justify-center items-center">
+      <div className="flex-row mt-5 justify-center items-center">
         <div className="flex justify-between">
           <div className="text-lg">Asset</div>
           <div className="flex gap-3">

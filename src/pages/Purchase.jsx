@@ -3,8 +3,7 @@ import Layout from "../layouts/main";
 import { FiFilter } from "react-icons/fi";
 import { GoPlus } from "react-icons/go";
 import { toast } from "react-toastify";
-import { FaChevronRight } from "react-icons/fa6";
-import { FaChevronLeft } from "react-icons/fa6";
+import { FaChevronRight, FaChevronLeft } from "react-icons/fa6";
 
 const Purchase = () => {
   const [loading, setLoading] = useState(false);
@@ -28,7 +27,7 @@ const Purchase = () => {
 
       try {
         const res = await fetch(
-          `https://servermms.onrender.com/api/transfers?sortBy=name&sortOrder=asc&limit=${limit}&skip=${
+          `https://servermms.onrender.com/api/purchases?sortBy=purchaseDate&sortOrder=desc&limit=${limit}&skip=${
             (page - 1) * limit
           }`,
           {
@@ -39,45 +38,53 @@ const Purchase = () => {
           }
         );
 
-        if (!res.ok) throw new Error("Failed to fetch assets data");
+        if (!res.ok) throw new toast.error("Failed to fetch assets data");
 
         const data = await res.json();
-        setAssets(data.assets || []);
-        setTotal(data.total || 0); // backend should return total count
+
+        setAssets(data.purchases || []);
+
+        setTotal(data.total || 0);
       } catch (err) {
         toast.error(err.message);
       } finally {
         setLoading(false);
+        console.log("fetched  data", assets);
+        toast.success("Successfully loaded data of", total);
       }
     };
 
     fetchAssets();
   }, [page, limit]);
-
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center h-screen bg-gray-50">
+        <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+        <p className="mt-4 text-lg font-semibold text-gray-700">Loading...</p>
+      </div>
+    );
+  }
   return (
     <Layout>
-      <div className="flex-row justify-center items-center">
+      <div className="flex-row justify-center mt-5 py-4 items-center">
         <div className="flex justify-between">
-          <div className="text-lg">Asset</div>
+          <div className="text-xl font-semibold">Transfer</div>
           <div className="flex gap-3">
-            {/* Filter Button */}
             <div>
               <button className="flex gap-2 text-lg border-1 rounded-md p-2 bg-white text-[#374151] border-[#d1d5db]">
                 <FiFilter className="pt-1 h-6 text-[#374151]" />
                 <span>Filters</span>
               </button>
             </div>
-            {/* Add Asset Button */}
             <div className="flex">
               <button className="flex gap-2 text-lg border-1 rounded-md p-2 bg-[#0284c7] text-white border-[#d1d5db]">
                 <GoPlus className="pt-1 h-7" />
-                <span>Add Asset</span>
+                <span>Add Assignment</span>
               </button>
             </div>
           </div>
         </div>
 
-        {/* Table */}
         <div className="mt-4 bg-white border border-gray-200 shadow-md rounded-xl">
           {loading ? (
             <p className="text-center">Loading...</p>
@@ -87,84 +94,94 @@ const Purchase = () => {
                 <thead className="text-[#6b7280]">
                   <tr>
                     <th className="px-4 py-4 text-left text-sm font-medium">
-                      NAME
+                      ASSET
                     </th>
-                    <th className="px-4 py-4 text-left text-sm font-medium">
-                      TYPE
-                    </th>
+
                     <th className="px-4 py-4 text-left text-sm font-medium">
                       BASE
                     </th>
                     <th className="px-4 py-4 text-left text-sm font-medium">
-                      AVAILABLE
+                      SUPPLIER
+                    </th>
+
+                    <th className="px-4 py-4 text-left text-sm font-medium">
+                      QUANTITY
                     </th>
                     <th className="px-4 py-4 text-left text-sm font-medium">
-                      ASSIGNED
+                      TOTAL COST
                     </th>
                     <th className="px-4 py-4 text-left text-sm font-medium">
                       STATUS
                     </th>
                     <th className="px-4 py-4 text-left text-sm font-medium">
-                      ACTIONS
+                      DATE
+                    </th>
+                    <th className="px-4 py-4 text-left text-sm font-medium">
+                      ACTION
                     </th>
                   </tr>
                 </thead>
                 <tbody>
-                  {assets.length > 0 ? (
+                  {
                     assets.map((asset, index) => (
                       <tr
                         key={asset._id || index}
                         className="border-t border-[#e5e7eb] hover:bg-gray-50"
                       >
                         <td className="px-4 py-4 text-[#0284c7] font-medium cursor-pointer">
-                          {asset.name}
+                          <div>{asset.assetName}</div>
+                          <div className="text-sm font-normal text-[#6b7280]">
+                            {asset.assetType}
+                          </div>
                         </td>
-                        <td className="px-4 py-4 text-sm text-[#6b7280]">
-                          {asset.type}
-                        </td>
+
                         <td className="px-4 py-4 text-sm text-[#6b7280]">
                           {asset.base}
                         </td>
                         <td className="px-4 py-4 text-sm text-[#6b7280]">
-                          {asset.available}
+                          <div>{asset.supplier}</div>
+                          {/* <div>
+                            <span>{asset.assignedTo?.rank || "-"}</span>
+                            <span>({asset.assignedTo?.id || "-"})</span>
+                          </div> */}
                         </td>
                         <td className="px-4 py-4 text-sm text-[#6b7280]">
-                          {asset.assigned}
+                          {asset.quantity}
                         </td>
-                        <td className="px-4 py-4">
-                          {asset.available > asset.assigned ? (
-                            <span className="px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                              Sufficient
-                            </span>
-                          ) : (
-                            <span className="px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                              Insufficient
-                            </span>
-                          )}
+
+                        <td className={`p-4 text-xs  `}>
+                          <div
+                            className={`rounded-full text-center p-1 ps-1 ${
+                              asset.status === "Delivered"
+                                ? "bg-green-200 text-green-900"
+                                : "bg-red-200 text-red-800"
+                            }`}
+                          >
+                            {asset.status}
+                          </div>
                         </td>
-                        <td className="flex px-4 py-4 gap-6 text-sm">
-                          <button className="text-[#0284c7] hover:underline">
-                            View
-                          </button>
-                          <button className="text-[#2563eb] hover:underline">
-                            Edit
-                          </button>
-                          <button className="text-[#DC2626] hover:underline">
-                            Delete
-                          </button>
+                        <td className="px-4 py-4 text-sm text-[#6b7280]">
+                          ${asset.totalCost}
+                        </td>
+                        <td className="px-4 py-4 text-sm text-[#6b7280]">
+                          {new Date(asset.createdAt).toLocaleDateString()}
+                        </td>
+                        <td className="px-4 py-4 text-sm text-[#0284c7]">
+                          View
                         </td>
                       </tr>
                     ))
-                  ) : (
-                    <tr>
-                      <td
-                        colSpan="7"
-                        className="text-center py-4 text-gray-500"
-                      >
-                        No assets found
-                      </td>
-                    </tr>
-                  )}
+                    // ) : (
+                    //   <tr>
+                    //     <td
+                    //       colSpan="7"
+                    //       className="text-center py-4 text-gray-500"
+                    //     >
+                    //       No assignments found
+                    //     </td>
+                    //   </tr>
+                    // )}
+                  }
                 </tbody>
               </table>
             </div>
@@ -172,24 +189,27 @@ const Purchase = () => {
 
           {/* Pagination */}
           <div className="flex justify-between px-4">
-            <div className="flex mt-4">Showing 11 to 14 of 14 results</div>
+            <div className="flex mt-4">
+              Showing {(page - 1) * limit + 1} to{" "}
+              {Math.min(page * limit, total)} of {total} results
+            </div>
             <div className="flex gap-3">
               <div className="flex mt-4">
                 <select
                   id="options"
                   value={limit}
-                  onChange={(e) => setLimit(e.target.value)}
-                  className="block w-full  border hover:border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-none  focus:border-none"
+                  onChange={(e) => setLimit(Number(e.target.value))}
+                  className="block w-full border hover:border-gray-300 rounded-md shadow-sm focus:outline-none"
                 >
                   <option value="10">10 per page</option>
-                  <option value="25">20 per page</option>
+                  <option value="25">25 per page</option>
                   <option value="50">50 per page</option>
                   <option value="100">100 per page</option>
                 </select>
               </div>
               <div className="flex justify-end mt-4 ">
                 <button
-                  className="px-3 py-1 rounded-l-md border  disabled:opacity-50"
+                  className="px-3 py-1 rounded-l-md border disabled:opacity-50"
                   onClick={() => setPage((p) => p - 1)}
                   disabled={page === 1}
                 >
@@ -199,10 +219,10 @@ const Purchase = () => {
                 {[...Array(totalPages)].map((_, i) => (
                   <button
                     key={i}
-                    className={`px-3 py-1 border  ${
+                    className={`px-3 py-1 border ${
                       page === i + 1
-                        ? "bg-[#f0f9ff] text-[#0284c7] border-1 border-[#0284c7]"
-                        : "border-1 border-[#d1d5db] text-[#6b7280]"
+                        ? "bg-[#f0f9ff] text-[#0284c7] border-[#0284c7]"
+                        : "border-[#d1d5db] text-[#6b7280]"
                     }`}
                     onClick={() => setPage(i + 1)}
                   >
@@ -211,7 +231,7 @@ const Purchase = () => {
                 ))}
 
                 <button
-                  className="px-3 py-1 border rounded-r-md  disabled:opacity-50"
+                  className="px-3 py-1 border rounded-r-md disabled:opacity-50"
                   onClick={() => setPage((p) => p + 1)}
                   disabled={page === totalPages}
                 >

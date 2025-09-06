@@ -5,7 +5,7 @@ import { Formik, Form, Field, ErrorMessage } from "formik";
 import * as Yup from "yup";
 import SystemSettings from "../components/SystemSetting";
 
-export default function SettingsPage() {
+export default function Settings() {
   const [activeTab, setActiveTab] = useState("General");
   const [newAsset, setNewAsset] = useState("");
   const [newBase, setNewBase] = useState("");
@@ -53,7 +53,7 @@ export default function SettingsPage() {
     toast.success("base type removed ");
   };
 
-  // ✅ Formik initial values
+  //  Formik initial values
   const initialValues = {
     systemName: "Military Asset Management System",
     organizationName: "Department of Defense",
@@ -65,7 +65,7 @@ export default function SettingsPage() {
     emailNotifications: true,
   };
 
-  // ✅ Yup validation schema
+  //  Yup validation schema
   const validationSchema = Yup.object({
     systemName: Yup.string().required("System Name is required"),
     organizationName: Yup.string().required("Organization Name is required"),
@@ -78,7 +78,7 @@ export default function SettingsPage() {
 
   return (
     <Layout>
-      <div className="w-full min-w-full space-y-6 p-6">
+      <div className="w-full min-w-full space-y-6 md:p-6 p-1  ">
         {/* Tabs */}
         <div className="text-xl mt-5 font-medium">Settings</div>
         <div className="border-b border-[#e5e7eb]">
@@ -100,7 +100,7 @@ export default function SettingsPage() {
         </div>
 
         <div className="bg-white shadow rounded-2xl px-4 py-2">
-          {/* ✅ General Settings with Formik */}
+          {/* General Settings with Formik */}
           {activeTab === "General" && (
             <>
               <div className="px-4 py-6">
@@ -114,102 +114,106 @@ export default function SettingsPage() {
                   onSubmit={handleSubmit}
                 >
                   {({ values, handleChange }) => (
-                    <Form className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                    <Form className="space-y-5 ps-0 ">
                       {/* System Name */}
-                      <div>
-                        <label className="block text-sm font-medium mb-1 text-[#374151]">
-                          System Name
-                        </label>
-                        <Field
-                          type="text"
-                          name="systemName"
-                          className="w-full border rounded-lg px-3 py-2"
-                        />
-                        <ErrorMessage
-                          name="systemName"
-                          component="div"
-                          className="text-red-500 text-sm"
-                        />
-                      </div>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-sm font-medium mb-1 text-[#374151]">
+                            System Name
+                          </label>
+                          <Field
+                            type="text"
+                            name="systemName"
+                            className="w-full border-0 rounded-lg px-3 py-0"
+                          />
+                          <ErrorMessage
+                            name="systemName"
+                            component="div"
+                            className="text-red-500 text-sm"
+                          />
+                        </div>
 
-                      {/* Organization Name */}
-                      <div>
-                        <label className="block text-sm font-medium mb-1 text-[#374151]">
-                          Organization Name
-                        </label>
-                        <Field
-                          type="text"
-                          name="organizationName"
-                          className="w-full border rounded-lg px-3 py-2"
-                        />
-                        <ErrorMessage
-                          name="organizationName"
-                          component="div"
-                          className="text-red-500 text-sm"
-                        />
+                        {/* Organization Name */}
+                        <div>
+                          <label className="block text-sm font-medium mb-1 text-[#374151]">
+                            Organization Name
+                          </label>
+                          <Field
+                            type="text"
+                            name="organizationName"
+                            className="w-full border-0 rounded-lg px-3 py-0"
+                          />
+                          <ErrorMessage
+                            name="organizationName"
+                            component="div"
+                            className="text-red-500 text-sm"
+                          />
+                        </div>
                       </div>
-
                       {/* Default Currency */}
-                      <div>
-                        <label className="block text-sm font-medium mb-1 text-[#374151]">
-                          Default Currency
-                        </label>
-                        <Field
-                          as="select"
-                          name="defaultCurrency"
-                          className="w-full border rounded-lg px-3 py-2"
-                        >
-                          <option>USD ($)</option>
-                          <option>EUR (€)</option>
-                          <option>GBP (£)</option>
-                        </Field>
-                      </div>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-sm font-medium mb-1 text-[#374151]">
+                            Default Currency
+                          </label>
+                          <Field
+                            as="select"
+                            name="defaultCurrency"
+                            className="w-full border-0 rounded-lg px-3 py-0"
+                          >
+                            <option>USD ($)</option>
+                            <option>EUR (€)</option>
+                            <option>GBP (£)</option>
+                          </Field>
+                        </div>
 
-                      {/* Theme */}
-                      <div>
-                        <label className="block text-sm font-medium mb-1 text-[#374151]">
-                          Theme
-                        </label>
-                        <Field
-                          as="select"
-                          name="theme"
-                          className="w-full border rounded-lg px-3 py-2"
-                        >
-                          <option>Default</option>
-                          <option>Dark</option>
-                          <option>Light</option>
-                        </Field>
+                        {/* Theme */}
+                        <div>
+                          <label className="block text-sm font-medium mb-1 text-[#374151]">
+                            Theme
+                          </label>
+                          <Field
+                            as="select"
+                            name="theme"
+                            className="w-full border-0 rounded-lg px-3 py-0"
+                          >
+                            <option>Default</option>
+                            <option>Dark</option>
+                            <option>Light</option>
+                          </Field>
+                        </div>
                       </div>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {/* Date Format */}
+                        <div>
+                          <label className="block text-sm font-medium mb-1 text-[#374151]">
+                            Date Format
+                          </label>
+                          <Field
+                            as="select"
+                            name="dateFormat"
+                            className="w-full border-0 rounded-lg px-3 py-0"
+                          >
+                            <option>MM/DD/YYYY</option>
+                            <option>DD/MM/YYYY</option>
+                            <option>YYYY-MM-DD</option>
+                          </Field>
+                        </div>
 
-                      {/* Date Format */}
-                      <div>
-                        <label className="block text-sm font-medium mb-1 text-[#374151]">
-                          Date Format
-                        </label>
-                        <Field
-                          as="select"
-                          name="dateFormat"
-                          className="w-full border rounded-lg px-3 py-2"
-                        >
-                          <option>MM/DD/YYYY</option>
-                          <option>DD/MM/YYYY</option>
-                          <option>YYYY-MM-DD</option>
-                        </Field>
-                      </div>
-
-                      {/* Time Format */}
-                      <div>
-                        <label className="block text-sm font-medium mb-1 text-[#374151]">
-                          Time Format
-                        </label>
-                        <Field
-                          as="select"
-                          name="timeFormat"
-                          className="w-full border rounded-lg px-3 py-2"
-                        >
-                          <option>12-hour (AM/PM)</option>
-                          <option>24-hour</option>
-                        </Field>
+                        {/* Time Format */}
+                        <div>
+                          <label className="block text-sm font-medium mb-1 text-[#374151]">
+                            Time Format
+                          </label>
+                          <Field
+                            as="select"
+                            name="timeFormat"
+                            className="w-full border-0 rounded-lg px-3 py-0"
+                          >
+                            <option>12-hour (AM/PM)</option>
+                            <option>24-hour</option>
+                          </Field>
+                        </div>
                       </div>
 
                       {/* Timezone */}
@@ -220,7 +224,7 @@ export default function SettingsPage() {
                         <Field
                           as="select"
                           name="timezone"
-                          className="w-full border rounded-lg px-3 py-2"
+                          className="w-full border-0 rounded-lg px-3 py-0"
                         >
                           <option>Eastern Time (ET)</option>
                           <option>Central Time (CT)</option>

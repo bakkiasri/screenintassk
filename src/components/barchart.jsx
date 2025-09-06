@@ -8,8 +8,6 @@ import {
   Legend,
 } from "chart.js";
 import { Bar } from "react-chartjs-2";
-
-// ✅ Register Chart.js components
 ChartJS.register(
   CategoryScale,
   LinearScale,
@@ -19,21 +17,34 @@ ChartJS.register(
   Legend
 );
 
-const BarChart = () => {
-  const data = {
-    labels: ["Weapon", "Vehicle", "Ammunition"],
+function BarChart({ data }) {
+  const assetsByType = data?.assetsByType || {};
+
+  const labels = assetsByType.map((item) => item.type);
+  // values → e.g., available count
+  const values = assetsByType.map((item) => item.count);
+  console.log(assetsByType);
+  const data1 = {
+    labels: labels,
     datasets: [
       {
-        label: "Assets",
-        data: [1200, 1000, 9000],
-        backgroundColor: "#0284C7",
+        label: "Available",
+        backgroundColor: "#10B981",
+        data: values, // available counts
+      },
+      {
+        label: "Assigned",
+        backgroundColor: "#F59E0B",
+        data: values, // assigned counts
       },
     ],
   };
 
+  // Chart Options
   const options = {
     responsive: true,
     maintainAspectRatio: true,
+    resizeDelay: 200,
     plugins: {
       legend: {
         position: "top",
@@ -57,15 +68,10 @@ const BarChart = () => {
   };
 
   return (
-    <>
-      <h2 className="text-lg text-center font-semibold m">Assets Overview</h2>
-      <Bar
-        data={data}
-        options={options}
-        className="w-full  flex justify-center scrollbar-none   "
-      />
-    </>
+    <div className="flex justify-center pe-6 w-[350px] sm:w-full md:w-full h-[300px]">
+      <Bar data={data1} options={options} />
+    </div>
   );
-};
+}
 
 export default BarChart;

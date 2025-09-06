@@ -28,7 +28,12 @@ function App() {
         <Route path="/settings" element={<Settings />} />
         <Route path="/expenditure" element={<Expenditure />} />
       </Routes>
-      <ToastContainer position="top-right" autoClose={3000} />
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={true}
+        theme="dark"
+      />
     </div>
   );
 }

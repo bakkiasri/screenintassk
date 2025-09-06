@@ -15,7 +15,9 @@ function Layout({ children }) {
         </div>
 
         {/* Scrollable content */}
-        <div className="flex-1 overflow-y-auto mt-5 p-10">{children}</div>
+        <div className="flex-1 overflow-y-auto md:mt-5 mt-10 md:p-10 p-1 ">
+          {children}
+        </div>
       </div>
     </div>
   );
