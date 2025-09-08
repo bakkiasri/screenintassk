@@ -10,51 +10,92 @@ const Users = () => {
   const [loading, setLoading] = useState(false);
   const [assets, setAssets] = useState([]);
   const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState(10); // rows per page
+  const [limit, setLimit] = useState(10);
   const [total, setTotal] = useState(0);
   const [open, setOpen] = useState(false);
+  const [filter, setFilter] = useState(false);
+
+  // filters state
+  const [filters, setFilters] = useState({
+    role: "",
+    base: "",
+    status: "",
+    search: "",
+  });
 
   const totalPages = Math.ceil(total / limit);
 
+  // fetch data
+  const fetchAssets = async () => {
+    const token = localStorage.getItem("authToken");
+    if (!token) {
+      toast.error("No token found. Please login first.");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      // Build query params dynamically
+      const params = new URLSearchParams({
+        sortBy: "fullName",
+        sortOrder: "asc",
+        limit: limit,
+        skip: (page - 1) * limit,
+      });
+
+      if (filters.role) params.append("role", filters.role);
+      if (filters.base) params.append("base", filters.base);
+      if (filters.status) params.append("active", filters.status);
+      if (filters.search) params.append("search", filters.search);
+
+      const res = await fetch(
+        `https://servermms.onrender.com/api/users?${params.toString()}`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (!res.ok) throw new Error("Failed to fetch users data");
+
+      const data = await res.json();
+
+      setAssets(data.users || data || []); // depends on your API structure
+      setTotal(data.total || 0);
+    } catch (err) {
+      toast.error(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // run only on page/limit change
   useEffect(() => {
-    const fetchAssets = async () => {
-      const token = localStorage.getItem("authToken");
-      if (!token) {
-        toast.error("No token found. Please login first.");
-        return;
-      }
-
-      setLoading(true);
-      try {
-        const res = await fetch(
-          `https://servermms.onrender.com/api/users?sortBy=fullName&sortOrder=asc&limit=${limit}&skip=${
-            (page - 1) * limit
-          }`,
-          {
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-
-        if (!res.ok) throw new Error("Failed to fetch assets data");
-
-        const data = await res.json();
-
-        setAssets(data || []);
-        setTotal(data.total || 0);
-      } catch (err) {
-        toast.error(err.message);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchAssets();
   }, [page, limit]);
 
-  //  Toggle user status
+  // handle filter change
+  const handleFilterChange = (e) => {
+    const { name, value } = e.target;
+    setFilters((prev) => ({ ...prev, [name]: value }));
+  };
+
+  // apply filters
+  const applyFilters = () => {
+    setPage(1); // reset to first page
+    fetchAssets();
+  };
+
+  // reset filters
+  const resetFilters = () => {
+    setFilters({ role: "", base: "", status: "", search: "" });
+    setPage(1);
+    fetchAssets();
+  };
+
+  // toggle user status
   const handleToggleStatus = async (id, newStatus) => {
     try {
       const token = localStorage.getItem("authToken");
@@ -76,7 +117,6 @@ const Users = () => {
         `User ${newStatus ? "activated" : "deactivated"} successfully`
       );
 
-      // update state immediately
       setAssets((prev) =>
         prev.map((asset) =>
           asset._id === id ? { ...asset, active: newStatus } : asset
@@ -87,11 +127,11 @@ const Users = () => {
     }
   };
 
-  // Handle edit (placeholder for now)
   const handleEdit = (id) => {
     setOpen(true);
     toast.info(`Edit user ${id}`);
   };
+
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center h-screen bg-gray-50">
@@ -100,6 +140,7 @@ const Users = () => {
       </div>
     );
   }
+
   return (
     <Layout>
       <div className="flex-row justify-center mt-5 py-4 items-center">
@@ -107,7 +148,10 @@ const Users = () => {
           <div className="text-xl font-semibold">Users</div>
           <div className="flex gap-3">
             <div>
-              <button className="flex gap-2 text-lg border-1 rounded-md p-2 bg-white text-[#374151] border-[#d1d5db]">
+              <button
+                className="flex gap-2 text-lg border-1 rounded-md p-2 bg-white text-[#374151] border-[#d1d5db]"
+                onClick={() => setFilter((prev) => !prev)}
+              >
                 <FiFilter className="pt-1 h-6 text-[#374151]" />
                 <span>Filters</span>
               </button>
@@ -121,6 +165,86 @@ const Users = () => {
           </div>
         </div>
 
+        {/* Filters UI */}
+        {filter && (
+          <div className="flex-row p-3 bg-white rounded-sm mt-5 shadow-sm">
+            <div className="text-xl p-3">Filter</div>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 p-3">
+              <div>
+                <label>Role</label>
+                <select
+                  name="role"
+                  value={filters.role}
+                  onChange={handleFilterChange}
+                  className="block w-full border rounded-md shadow-sm focus:outline-none"
+                >
+                  <option value="">All roles</option>
+                  <option value="Admin">Admin</option>
+                  <option value="BaseCommander">Base Commander</option>
+                  <option value="LogisticsOfficer">Logistics Officer</option>
+                </select>
+              </div>
+
+              <div>
+                <label>Base</label>
+                <select
+                  name="base"
+                  value={filters.base}
+                  onChange={handleFilterChange}
+                  className="block w-full border rounded-md shadow-sm focus:outline-none"
+                >
+                  <option value="">All bases</option>
+                  <option value="Base Alpha">Base Alpha</option>
+                  <option value="Base Bravo">Base Bravo</option>
+                  <option value="Base Charlie">Base Charlie</option>
+                </select>
+              </div>
+
+              <div>
+                <label>Status</label>
+                <select
+                  name="status"
+                  value={filters.status}
+                  onChange={handleFilterChange}
+                  className="block w-full border rounded-md shadow-sm focus:outline-none"
+                >
+                  <option value="">All</option>
+                  <option value="true">Active</option>
+                  <option value="false">Inactive</option>
+                </select>
+              </div>
+
+              <div>
+                <label>Search</label>
+                <input
+                  type="text"
+                  name="search"
+                  placeholder="Search by name/email"
+                  value={filters.search}
+                  onChange={handleFilterChange}
+                  className="block w-full border rounded-md shadow-sm focus:outline-none"
+                />
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-3 p-3">
+              <button
+                onClick={resetFilters}
+                className="border py-2 px-4 rounded-md border-[#d1d5db] hover:bg-gray-100"
+              >
+                Reset
+              </button>
+              <button
+                onClick={applyFilters}
+                className="border py-2 px-4 rounded-md bg-[#0284c7] text-white"
+              >
+                Apply Filter
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Table */}
         <div className="mt-4 bg-white border border-gray-200 shadow-md rounded-xl">
           {loading ? (
             <p className="text-center">Loading...</p>
@@ -198,8 +322,6 @@ const Users = () => {
                           {asset.active ? "active" : "inactive"}
                         </span>
                       </td>
-
-                      {/* Action buttons */}
                       <td className="flex gap-2 px-4 py-4 font-medium text-sm">
                         <button
                           className="text-blue-600 mr-3 cursor-pointer"

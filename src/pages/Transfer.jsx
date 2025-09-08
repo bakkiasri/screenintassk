@@ -9,52 +9,83 @@ const Transfer = () => {
   const [loading, setLoading] = useState(false);
   const [assets, setAssets] = useState([]);
   const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState(10); // rows per page
+  const [limit, setLimit] = useState(10);
   const [total, setTotal] = useState(0);
+  const [filter, setFilter] = useState(false);
+
+  // Filter states
+  const [fromBase, setFromBase] = useState("");
+  const [toBase, setToBase] = useState("");
+  const [status, setStatus] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
 
   const totalPages = Math.ceil(total / limit);
 
+  const fetchTransfers = async () => {
+    const token = localStorage.getItem("authToken");
+
+    if (!token) {
+      toast.error("No token found. Please login first.");
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const queryParams = new URLSearchParams({
+        sortBy: "createdAt",
+        sortOrder: "desc",
+        limit,
+        skip: (page - 1) * limit,
+      });
+
+      if (fromBase) queryParams.append("fromBase", fromBase);
+      if (toBase) queryParams.append("toBase", toBase);
+      if (status) queryParams.append("status", status);
+      if (searchQuery) queryParams.append("search", searchQuery);
+      if (startDate) queryParams.append("startDate", startDate);
+      if (endDate) queryParams.append("endDate", endDate);
+
+      const res = await fetch(
+        `https://servermms.onrender.com/api/transfers?${queryParams.toString()}`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (!res.ok) throw new Error("Failed to fetch transfers data");
+
+      const data = await res.json();
+      setAssets(data.transfers || []);
+      setTotal(data.total || 0);
+    } catch (err) {
+      toast.error(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // fetch only when page/limit changes
   useEffect(() => {
-    const fetchAssets = async () => {
-      const token = localStorage.getItem("authToken");
-
-      if (!token) {
-        toast.error("No token found. Please login first.");
-        return;
-      }
-
-      setLoading(true);
-
-      try {
-        const res = await fetch(
-          `https://servermms.onrender.com/api/transfers?sortBy=createdAt&sortOrder=desc&limit=${limit}&skip=${
-            (page - 1) * limit
-          }`,
-          {
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-
-        if (!res.ok) throw new toast.error("Failed to fetch assets data");
-
-        const data = await res.json();
-
-        setAssets(data.transfers || []);
-
-        setTotal(data.total || 0);
-      } catch (err) {
-        toast.error(err.message);
-      } finally {
-        setLoading(false);
-        console.log("fetched  data", assets);
-      }
-    };
-
-    fetchAssets();
+    fetchTransfers();
   }, [page, limit]);
+
+  const handleReset = () => {
+    setFromBase("");
+    setToBase("");
+    setStatus("");
+    setSearchQuery("");
+    setStartDate("");
+    setEndDate("");
+    setPage(1);
+    fetchTransfers();
+  };
+
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center h-screen bg-gray-50">
@@ -63,141 +94,234 @@ const Transfer = () => {
       </div>
     );
   }
+
   return (
     <Layout>
       <div className="flex-row justify-center mt-5 py-4 items-center">
         <div className="flex justify-between">
-          <div className="text-lg">Transfer</div>
+          <div className="text-lg font-bold">Transfers</div>
           <div className="flex gap-3">
-            <div>
-              <button className="flex gap-2 text-lg border-1 rounded-md p-2 bg-white text-[#374151] border-[#d1d5db]">
-                <FiFilter className="pt-1 h-6 text-[#374151]" />
-                <span>Filters</span>
-              </button>
-            </div>
-            <div className="flex">
-              <button className="flex gap-2 text-lg border-1 rounded-md p-2 bg-[#0284c7] text-white border-[#d1d5db]">
-                <GoPlus className="pt-1 h-7" />
-                <span>Add Assignment</span>
-              </button>
-            </div>
+            {/* Filter Button */}
+            <button
+              onClick={() => setFilter((prev) => !prev)}
+              className="flex gap-2 text-lg cursor-pointer border rounded-md p-2 bg-white text-[#374151] border-[#d1d5db]"
+            >
+              <FiFilter className="pt-1 h-6 text-[#374151]" />
+              <span>Filters</span>
+            </button>
+
+            {/* Add Transfer Button */}
+            <button className="flex gap-2 text-lg border rounded-md p-2 bg-[#0284c7] text-white border-[#d1d5db]">
+              <GoPlus className="pt-1 h-7" />
+              <span>Add Transfer</span>
+            </button>
           </div>
         </div>
 
+        {/* Filter Section */}
+        {filter && (
+          <div className="flex-row p-3 bg-white rounded-sm mt-5 shadow-sm">
+            <div className="text-xl p-3">Filter</div>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 p-3">
+              {/* From Base */}
+              <div>
+                <label>From Base</label>
+                <select
+                  value={fromBase}
+                  onChange={(e) => setFromBase(e.target.value)}
+                  className="block w-full border-0 rounded-md shadow-sm focus:outline-none"
+                >
+                  <option value="">All</option>
+                  <option value="Base Alpha">Base Alpha</option>
+                  <option value="Base Bravo">Base Bravo</option>
+                  <option value="Base Charlie">Base Charlie</option>
+                </select>
+              </div>
+
+              {/* To Base */}
+              <div>
+                <label>To Base</label>
+                <select
+                  value={toBase}
+                  onChange={(e) => setToBase(e.target.value)}
+                  className="block w-full border-0 rounded-md shadow-sm focus:outline-none"
+                >
+                  <option value="">All</option>
+                  <option value="Base Alpha">Base Alpha</option>
+                  <option value="Base Bravo">Base Bravo</option>
+                  <option value="Base Charlie">Base Charlie</option>
+                </select>
+              </div>
+
+              {/* Status */}
+              <div>
+                <label>Status</label>
+                <select
+                  value={status}
+                  onChange={(e) => setStatus(e.target.value)}
+                  className="block w-full border-0 rounded-md shadow-sm focus:outline-none"
+                >
+                  <option value="">All</option>
+                  <option value="Completed">Completed</option>
+                  <option value="Pending">Pending</option>
+                  <option value="Rejected">Rejected</option>
+                </select>
+              </div>
+
+              {/* Start Date */}
+              <div>
+                <label>Start Date</label>
+                <input
+                  type="date"
+                  value={startDate}
+                  onChange={(e) => setStartDate(e.target.value)}
+                  className="block w-full border-0 rounded-md shadow-sm focus:outline-none"
+                />
+              </div>
+
+              {/* End Date */}
+              <div>
+                <label>End Date</label>
+                <input
+                  type="date"
+                  value={endDate}
+                  onChange={(e) => setEndDate(e.target.value)}
+                  className="block w-full border-0 rounded-md shadow-sm focus:outline-none"
+                />
+              </div>
+
+              {/* Search */}
+              <div>
+                <label>Search</label>
+                <input
+                  type="text"
+                  placeholder="Search by asset name"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="block w-full border-0 rounded-md shadow-sm focus:outline-none"
+                />
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-3 p-3">
+              <button
+                onClick={handleReset}
+                className="border py-2 px-4 rounded-md border-[#d1d5db] hover:bg-gray-100"
+              >
+                Reset
+              </button>
+              <button
+                onClick={() => {
+                  setPage(1);
+                  fetchTransfers();
+                }}
+                className="border py-2 px-4 rounded-md bg-[#0284c7] text-white"
+              >
+                Apply Filter
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Table */}
         <div className="mt-4 bg-white border border-gray-200 shadow-md rounded-xl">
-          {loading ? (
-            <div className="flex flex-col items-center justify-center h-screen bg-gray-50">
-              <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-              <p className="mt-4 text-lg font-semibold text-gray-700">
-                Loading...
-              </p>
-            </div>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="min-w-full">
-                <thead className="text-[#6b7280]">
+          <div className="overflow-x-auto">
+            <table className="min-w-full">
+              <thead className="text-[#6b7280]">
+                <tr>
+                  <th className="px-4 py-4 text-left text-sm font-medium">
+                    ASSET
+                  </th>
+                  <th className="px-4 py-4 text-left text-sm font-medium">
+                    FROM
+                  </th>
+                  <th className="px-4 py-4 text-left text-sm font-medium">
+                    TO
+                  </th>
+                  <th className="px-4 py-4 text-left text-sm font-medium">
+                    QUANTITY
+                  </th>
+                  <th className="px-4 py-4 text-left text-sm font-medium">
+                    STATUS
+                  </th>
+                  <th className="px-4 py-4 text-left text-sm font-medium">
+                    DATE
+                  </th>
+                  <th className="px-4 py-4 text-left text-sm font-medium">
+                    ACTION
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {assets.length > 0 ? (
+                  assets.map((asset, index) => (
+                    <tr
+                      key={asset._id || index}
+                      className="border-t border-[#e5e7eb] hover:bg-gray-50"
+                    >
+                      <td className="px-4 py-4 text-[#0284c7] font-medium cursor-pointer">
+                        <div>{asset.assetName}</div>
+                        <div className="text-sm font-normal text-[#6b7280]">
+                          {asset.assetType}
+                        </div>
+                      </td>
+                      <td className="px-4 py-4 text-sm text-[#6b7280]">
+                        {asset.fromBase}
+                      </td>
+                      <td className="px-4 py-4 text-sm text-[#6b7280]">
+                        {asset.toBase}
+                      </td>
+                      <td className="px-4 py-4 text-sm text-[#6b7280]">
+                        {asset.quantity}
+                      </td>
+                      <td className="px-4 py-4 text-sm">
+                        <span
+                          className={`rounded-full px-2 py-1 text-xs ${
+                            asset.status === "Completed"
+                              ? "bg-green-200 text-green-900"
+                              : "bg-yellow-200 text-yellow-900"
+                          }`}
+                        >
+                          {asset.status}
+                        </span>
+                      </td>
+                      <td className="px-4 py-4 text-sm text-[#6b7280]">
+                        {new Date(asset.createdAt).toLocaleDateString()}
+                      </td>
+                      <td className="px-4 py-4 text-sm text-[#0284c7]">View</td>
+                    </tr>
+                  ))
+                ) : (
                   <tr>
-                    <th className="px-4 py-4 text-left text-sm font-medium">
-                      ASSET
-                    </th>
-
-                    <th className="px-4 py-4 text-left text-sm font-medium">
-                      FROM
-                    </th>
-                    <th className="px-4 py-4 text-left text-sm font-medium">
-                      TO
-                    </th>
-
-                    <th className="px-4 py-4 text-left text-sm font-medium">
-                      QUANTITY
-                    </th>
-                    <th className="px-4 py-4 text-left text-sm font-medium">
-                      STATUS
-                    </th>
-                    <th className="px-4 py-4 text-left text-sm font-medium">
-                      DATE
-                    </th>
-                    <th className="px-4 py-4 text-left text-sm font-medium">
-                      ACTION
-                    </th>
+                    <td colSpan="7" className="text-center py-4 text-gray-500">
+                      No transfers found
+                    </td>
                   </tr>
-                </thead>
-                <tbody>
-                  {
-                    assets.map((asset, index) => (
-                      <tr
-                        key={asset._id || index}
-                        className="border-t border-[#e5e7eb] hover:bg-gray-50"
-                      >
-                        <td className="px-4 py-4 text-[#0284c7] font-medium cursor-pointer">
-                          <div>{asset.assetName}</div>
-                          <div className="text-sm font-normal text-[#6b7280]">
-                            {asset.assetType}
-                          </div>
-                        </td>
-
-                        <td className="px-4 py-4 text-sm text-[#6b7280]">
-                          {asset.fromBase}
-                        </td>
-                        <td className="px-4 py-4 text-sm text-[#6b7280]">
-                          <div>{asset.toBase}</div>
-                          {/* <div>
-                            <span>{asset.assignedTo?.rank || "-"}</span>
-                            <span>({asset.assignedTo?.id || "-"})</span>
-                          </div> */}
-                        </td>
-                        <td className="px-4 py-4 text-sm text-[#6b7280]">
-                          {asset.quantity}
-                        </td>
-
-                        <td className={`px-4 py-4 text-xs  `}>
-                          <span
-                            className={`rounded-full p-1 ${
-                              asset.status === "Completed"
-                                ? "bg-green-200 text-green-900"
-                                : "bg-red-200 text-red-800"
-                            }`}
-                          >
-                            {asset.status}
-                          </span>
-                        </td>
-                        <td className="px-4 py-4 text-sm text-[#6b7280]">
-                          {new Date(asset.createdAt).toLocaleDateString()}
-                        </td>
-                        <td className="px-4 py-4 text-sm text-[#0284c7]">
-                          View
-                        </td>
-                      </tr>
-                    ))
-                    // ) : (
-                    //   <tr>
-                    //     <td
-                    //       colSpan="7"
-                    //       className="text-center py-4 text-gray-500"
-                    //     >
-                    //       No assignments found
-                    //     </td>
-                    //   </tr>
-                    // )}
-                  }
-                </tbody>
-              </table>
-            </div>
-          )}
+                )}
+              </tbody>
+            </table>
+          </div>
 
           {/* Pagination */}
-          <div className="flex justify-between px-4">
-            <div className="flex mt-4">
-              Showing {(page - 1) * limit + 1} to{" "}
-              {Math.min(page * limit, total)} of {total} results
+          <div className="flex justify-between px-4 py-4">
+            <div className="flex items-center">
+              {total > 0
+                ? `Showing ${(page - 1) * limit + 1} to ${Math.min(
+                    page * limit,
+                    total
+                  )} of ${total} results`
+                : "No results"}
             </div>
             <div className="flex gap-3">
-              <div className="flex mt-4">
+              <div>
                 <select
                   id="options"
                   value={limit}
-                  onChange={(e) => setLimit(Number(e.target.value))}
-                  className="block w-full border hover:border-gray-300 rounded-md shadow-sm focus:outline-none"
+                  onChange={(e) => {
+                    setLimit(Number(e.target.value));
+                    setPage(1);
+                  }}
+                  className="block border rounded-md shadow-sm focus:outline-none"
                 >
                   <option value="10">10 per page</option>
                   <option value="25">25 per page</option>
@@ -205,9 +329,9 @@ const Transfer = () => {
                   <option value="100">100 per page</option>
                 </select>
               </div>
-              <div className="flex justify-end mt-4 ">
+              <div className="flex justify-end">
                 <button
-                  className="px-3 py-1 rounded-l-md border disabled:opacity-50"
+                  className="px-3 py-1 border rounded-l-md disabled:opacity-50"
                   onClick={() => setPage((p) => p - 1)}
                   disabled={page === 1}
                 >

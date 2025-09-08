@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-
+import { toast } from "react-toastify";
 const LoginPage = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -28,9 +28,11 @@ const LoginPage = () => {
           localStorage.setItem("authToken", data.token);
           console.log("Token saved:", data.token);
         }
+        toast.success("logged in successfully");
         navigate("/dashboard");
       } else {
         setError(data.message || "Invalid username or password");
+        toast.error("Invalid username or password");
       }
     } catch (err) {
       setError("Something went wrong. Please try again.");
